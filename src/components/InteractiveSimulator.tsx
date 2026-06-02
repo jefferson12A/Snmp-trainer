@@ -92,12 +92,15 @@ export default function InteractiveSimulator({
     }
   ]);
 
-  const terminalEndRef = useRef<HTMLDivElement>(null);
+  const terminalScrollRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to terminal bottom on clean events
+  // Scroll to terminal bottom on clean events (without scrolling the main page/viewport)
   useEffect(() => {
-    if (terminalEndRef.current) {
-      terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (terminalScrollRef.current) {
+      terminalScrollRef.current.scrollTo({
+        top: terminalScrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   }, [logs]);
 
@@ -236,11 +239,6 @@ export default function InteractiveSimulator({
     setIsRunning(true);
     setPacketState('sending');
 
-    // Smoothly scroll down to the terminal and UDP transit visualization
-    setTimeout(() => {
-      scrollToLayoutElement('unix-terminal-console');
-    }, 100);
-    
     let trapOid = '';
     let trapLabel = '';
     let variableBindings = '';
@@ -350,11 +348,6 @@ export default function InteractiveSimulator({
     setIsRunning(true);
     setPacketState('sending');
     setExplanationText(`NMS enviando pacote UDP (${cmdId.toUpperCase()}): O Gerente solicitou o OID ${oid} ao agente na porta UDP 161.`);
-
-    // Smoothly scroll down to the terminal and UDP transit visualization
-    setTimeout(() => {
-      scrollToLayoutElement('unix-terminal-console');
-    }, 100);
 
     const timestamp = new Date().toLocaleTimeString();
     
@@ -726,6 +719,11 @@ export default function InteractiveSimulator({
       setExplanationText('Erro de Parâmetro: Digite ou escolha um OID na árvore para inicializar a simulação.');
       return;
     }
+
+    // Scroll smoothly to the UNIX terminal console
+    setTimeout(() => {
+      scrollToLayoutElement('unix-terminal-console');
+    }, 50);
 
     executeSNMPCall(
       selectedCommandId,
@@ -1464,7 +1462,7 @@ export default function InteractiveSimulator({
             {/* Console log outputs */}
             <div className="p-4 font-mono text-xs text-slate-200 bg-[#0a0f20] flex-1 flex flex-col min-h-0 overflow-hidden">
               {/* Scrollable area for logs */}
-              <div className="flex-1 overflow-y-auto space-y-4 pr-1 mb-2">
+              <div ref={terminalScrollRef} className="flex-1 overflow-y-auto space-y-4 pr-1 mb-2">
                 {logs.map((log) => {
                   if (log.type === 'input') {
                     return (
@@ -1501,7 +1499,6 @@ export default function InteractiveSimulator({
                     <span>► Aguardando resposta UDP Agente...</span>
                   </div>
                 )}
-                <div ref={terminalEndRef} />
               </div>
 
               {/* Interative Command Box Line */}

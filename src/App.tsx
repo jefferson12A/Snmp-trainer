@@ -46,27 +46,39 @@ export default function App() {
     }
   };
 
-  // Sidebar command click redirect with scroll down to simulator
+  // Sidebar command click redirect with scroll down to simulator button
   const handleSidebarCommandClick = (cmdId: string) => {
     setSelectedCommandId(cmdId);
     const cmd = SNMP_COMMANDS.find(c => c.id === cmdId);
     if (cmd) {
       setSelectedOid(cmd.suggestedOid);
     }
+    setActiveSection('simulator');
     setTimeout(() => {
-      scrollToSection('section-simulator', 'simulator');
-    }, 50);
+      const executeBtn = document.getElementById('btn-execute-simulation');
+      if (executeBtn) {
+        executeBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        scrollToSection('section-simulator', 'simulator');
+      }
+    }, 100);
   };
 
-  // MIB Browser load trigger with scroll down to simulator
+  // MIB Browser load trigger with scroll down to simulator button
   const handleOidLoadInSimulator = (oid: string, commandType?: string) => {
     setSelectedOid(oid);
     if (commandType) {
       setSelectedCommandId(commandType);
     }
+    setActiveSection('simulator');
     setTimeout(() => {
-      scrollToSection('section-simulator', 'simulator');
-    }, 50);
+      const executeBtn = document.getElementById('btn-execute-simulation');
+      if (executeBtn) {
+        executeBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        scrollToSection('section-simulator', 'simulator');
+      }
+    }, 100);
   };
 
   // Device mutations (persistence in current session)

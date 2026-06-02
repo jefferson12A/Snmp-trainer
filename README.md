@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="[https://ai.google.dev/static/site-assets/images/share-ais-513315318.png](https://www.parkplacetechnologies.com/wp-content/uploads/2021/09/How-SNMP-works-diagram.png)" />
+<img width="1200" height="475" alt="GHBanner" src="https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fwww.parkplacetechnologies.com%2Fblog%2Fwhat-is-snmp-a-comprehensive-guide%2F&opi=89978449" />
 </div>
 
 # Run and deploy your AI Studio app

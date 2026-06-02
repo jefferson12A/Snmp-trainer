@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="[https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fwww.parkplacetechnologies.com%2Fblog%2Fwhat-is-snmp-a-comprehensive-guide%2F&opi=89978449](https://www.parkplacetechnologies.com/wp-content/uploads/2021/09/How-SNMP-works-diagram.png)" />
+<img width="1200" height="475" alt="GHBanner" src="/assets/.aistudio/img/cat_snmp.png" />
 </div>
 <h1>Bem vindo ao CatSNMP</h1>
 

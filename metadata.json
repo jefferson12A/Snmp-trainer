@@ -1,0 +1,6 @@
+{
+  "name": "SNMP Trainer",
+  "description": "Uma plataforma educacional interativa sobre o protocolo SNMP, arquitetura Manager-Agent, MIBs e simulação de comandos CLI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

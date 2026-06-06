@@ -7,7 +7,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Network, Play, BookOpen, Layers, Terminal, Server, Key, Shield,
-  HelpCircle, Settings, Sliders, RefreshCw, Sparkles, X, ChevronRight, HelpCircle as HelpIcon
+  HelpCircle, Settings, Sliders, RefreshCw, Sparkles, X, ChevronRight, HelpCircle as HelpIcon,
+  Menu
 } from 'lucide-react';
 
 import { INITIAL_DEVICES, SNMP_COMMANDS } from './data';
@@ -32,6 +33,7 @@ export default function App() {
   // UI Utilities states (modals, toasts)
   const [showHelp, setShowHelp] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Asset URLs from original HTML source
   const networkImage = "https://lh3.googleusercontent.com/aida-public/AB6AXuB40CDAe4ThEnsqxOBa_w7r9wM4LVyWq8Owrp7fGRkdUD70nRD1VtQDLJZfAJcesId6cYSZO-ZOcsE47_OJ5tbasCYFD0MFJb-W7t67S-od8aZ3XYpkrLQVm1tVGi7SoDbpIIYPySUdRE8Hq-FWDLBTUjwm61P2z5tuGOX2huzv4B9YTpP7eVHFcPJLkc3Zywslvi_OTXpVayFNf-sBJkkWYqaw9PJkR62w4CNUnO022Q7TTwaInNP_NuufD826p4-twRZwkL-CyfI";
@@ -40,6 +42,7 @@ export default function App() {
   // Smooth Scroll Helper
   const scrollToSection = (id: string, sectionKey: 'introduction' | 'architecture' | 'simulator') => {
     setActiveSection(sectionKey);
+    setMobileMenuOpen(false);
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -117,44 +120,44 @@ export default function App() {
           </span>
         </div>
 
-        {/* Navigation scroll-shortcuts */}
-        <nav className="hidden md:flex items-center gap-1">
-          <button
-            id="nav-btn-introduction"
-            onClick={() => scrollToSection('section-introduction', 'introduction')}
-            className={`px-4 py-2 text-xs font-bold tracking-wide rounded-xl transition-all ${
-              activeSection === 'introduction'
-                ? 'bg-blue-50 text-blue-800 font-extrabold'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-            }`}
-          >
-            Apresentação
-          </button>
+        {/* Navigation scroll-shortcuts - Desktop only (>= lg) - Replaced with the same custom Menu trigger for desktop */}
+        <div className="hidden lg:flex items-center gap-3">
+          <div className="flex items-center gap-2 mr-1">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Seção Ativa:</span>
+            <div className="bg-blue-50 text-blue-800 border border-blue-100 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1.5 animate-in fade-in zoom-in duration-200">
+              {activeSection === 'introduction' && (
+                <>
+                  <BookOpen className="h-3.5 w-3.5" />
+                  <span>Apresentação</span>
+                </>
+              )}
+              {activeSection === 'simulator' && (
+                <>
+                  <Terminal className="h-3.5 w-3.5" />
+                  <span>Simulador</span>
+                </>
+              )}
+              {activeSection === 'architecture' && (
+                <>
+                  <Layers className="h-3.5 w-3.5" />
+                  <span>Árvore MIB</span>
+                </>
+              )}
+            </div>
+          </div>
 
           <button
-            id="nav-btn-simulator"
-            onClick={() => scrollToSection('section-simulator', 'simulator')}
-            className={`px-4 py-2 text-xs font-bold tracking-wide rounded-xl transition-all ${
-              activeSection === 'simulator'
-                ? 'bg-blue-50 text-blue-800 font-extrabold'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-            }`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="h-9 w-9 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-md active:scale-95 hover:bg-blue-800 transition-all outline-none"
+            title="Menu de Navegação"
           >
-            Simulador Terminal
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5 text-white" />
+            ) : (
+              <Menu className="h-5 w-5 text-white" />
+            )}
           </button>
-
-          <button
-            id="nav-btn-architecture"
-            onClick={() => scrollToSection('section-architecture', 'architecture')}
-            className={`px-4 py-2 text-xs font-bold tracking-wide rounded-xl transition-all ${
-              activeSection === 'architecture'
-                ? 'bg-blue-50 text-blue-800 font-extrabold'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-            }`}
-          >
-            Árvore MIB
-          </button>
-        </nav>
+        </div>
 
         {/* Action utility bar (right) */}
         <div className="flex items-center gap-3">
@@ -189,42 +192,140 @@ export default function App() {
       </header>
 
       {/* Main Layout Container */}
-      <div className="flex flex-col md:flex-row pt-16 flex-1 h-[calc(100vh-64px)] overflow-hidden">
+      <div className="flex flex-col lg:flex-row pt-28 lg:pt-16 flex-1 h-[calc(100vh-64px)] overflow-hidden">
         
-        {/* Navigation scroll mobile view */}
-        <div className="md:hidden bg-white border-b flex p-2 shrink-0 overflow-x-auto gap-1">
+        {/* Navigation scroll mobile/tablet view - Sticky/Fixed bar under the header */}
+        <div id="mobile-nav-bar" className="lg:hidden bg-white border-b border-slate-200/80 flex fixed top-16 left-0 right-0 z-35 h-12 items-center justify-between px-4 shadow-sm select-none">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Seção Ativa:</span>
+            <div className="bg-blue-50 text-blue-800 border border-blue-100 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+              {activeSection === 'introduction' && (
+                <>
+                  <BookOpen className="h-3 w-3" />
+                  <span>Apresentação</span>
+                </>
+              )}
+              {activeSection === 'simulator' && (
+                <>
+                  <Terminal className="h-3 w-3" />
+                  <span>Simulador</span>
+                </>
+              )}
+              {activeSection === 'architecture' && (
+                <>
+                  <Layers className="h-3 w-3" />
+                  <span>Árvore MIB</span>
+                </>
+              )}
+            </div>
+          </div>
+          
+          {/* Blue Hamburger / Menu Toggle Icon Button */}
           <button
-            onClick={() => scrollToSection('section-introduction', 'introduction')}
-            className={`text-xs px-3 py-2 rounded-lg font-bold shrink-0 ${
-              activeSection === 'introduction' ? 'bg-blue-700 text-white' : 'text-slate-600 hover:bg-slate-100'
-            }`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="h-8.5 w-8.5 rounded-lg bg-blue-700 text-white flex items-center justify-center shadow-md active:scale-95 hover:bg-blue-800 transition-all outline-none"
+            title="Menu de Navegação"
           >
-            Apresentação
-          </button>
-          <button
-            onClick={() => scrollToSection('section-simulator', 'simulator')}
-            className={`text-xs px-3 py-2 rounded-lg font-bold shrink-0 ${
-              activeSection === 'simulator' ? 'bg-blue-700 text-white' : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            Simulador
-          </button>
-          <button
-            onClick={() => scrollToSection('section-architecture', 'architecture')}
-            className={`text-xs px-3 py-2 rounded-lg font-bold shrink-0 ${
-              activeSection === 'architecture' ? 'bg-blue-700 text-white' : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            Árvore MIB
+            {mobileMenuOpen ? (
+              <X className="h-4.5 w-4.5 text-white" />
+            ) : (
+              <Menu className="h-4.5 w-4.5 text-white" />
+            )}
           </button>
         </div>
+
+        {/* Dropdown Panel Overlay - Both Mobile & Desktop */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              {/* Backdrop backdrop-blur filters for beautiful visual look */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 top-28 lg:top-16 bg-slate-900/40 backdrop-blur-xs z-30"
+              />
+              
+              {/* Dropdown body */}
+              <motion.div
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+                className="fixed top-28 lg:top-[72px] left-4 lg:left-auto right-4 lg:right-6 lg:w-80 bg-white border border-slate-200 shadow-xl rounded-2xl p-3 z-40 flex flex-col gap-1"
+              >
+                <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-2 pb-1.5 border-b border-slate-150 mb-1">
+                  Navegar para a Seção:
+                </div>
+                
+                <button
+                  onClick={() => scrollToSection('section-introduction', 'introduction')}
+                  className={`w-full flex items-center gap-3 p-2 rounded-xl font-bold text-xs transition-all ${
+                    activeSection === 'introduction'
+                      ? 'bg-blue-50 text-blue-900'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${
+                    activeSection === 'introduction' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                  <div className="flex flex-col text-left min-w-0">
+                    <span className="leading-tight text-xs font-bold text-slate-800">Apresentação</span>
+                    <span className="text-[9px] font-medium text-slate-400 truncate">Guia interativo e rota O.I.D.</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => scrollToSection('section-simulator', 'simulator')}
+                  className={`w-full flex items-center gap-3 p-2 rounded-xl font-bold text-xs transition-all ${
+                    activeSection === 'simulator'
+                      ? 'bg-blue-50 text-blue-900'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${
+                    activeSection === 'simulator' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    <Terminal className="h-4 w-4" />
+                  </div>
+                  <div className="flex flex-col text-left min-w-0">
+                    <span className="leading-tight text-xs font-bold text-slate-800">Simulador Terminal</span>
+                    <span className="text-[9px] font-medium text-slate-400 truncate">Testador de comandos SNMP interativos</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => scrollToSection('section-architecture', 'architecture')}
+                  className={`w-full flex items-center gap-3 p-2 rounded-xl font-bold text-xs transition-all ${
+                    activeSection === 'architecture'
+                      ? 'bg-blue-50 text-blue-900'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${
+                    activeSection === 'architecture' ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    <Layers className="h-4 w-4" />
+                  </div>
+                  <div className="flex flex-col text-left min-w-0">
+                    <span className="leading-tight text-xs font-bold text-slate-800">Árvore MIB</span>
+                    <span className="text-[9px] font-medium text-slate-400 truncate">Navegador estruturado da hierarquia MIB</span>
+                  </div>
+                </button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Main content display pane - Single scrollable container */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 h-full scroll-smooth">
           <div className="max-w-6xl mx-auto w-full pb-24 space-y-16">
             
             {/* Section 1: Intro */}
-            <section id="section-introduction" className="scroll-mt-6">
+            <section id="section-introduction" className="scroll-mt-32 lg:scroll-mt-20">
               <IntroductionPanel
                 onSelectCommand={handleSidebarCommandClick}
                 networkImage={networkImage}
@@ -235,7 +336,7 @@ export default function App() {
             <div className="h-px bg-slate-200" />
 
             {/* Section 2: Simulator */}
-            <section id="section-simulator" className="scroll-mt-6">
+            <section id="section-simulator" className="scroll-mt-32 lg:scroll-mt-20">
               <InteractiveSimulator
                 selectedCommandId={selectedCommandId}
                 onSelectCommand={setSelectedCommandId}
@@ -252,7 +353,7 @@ export default function App() {
             <div className="h-px bg-slate-200" />
 
             {/* Section 3: MIB Tree Browser */}
-            <section id="section-architecture" className="scroll-mt-6">
+            <section id="section-architecture" className="scroll-mt-32 lg:scroll-mt-20">
               <MIBTreePanel
                 onLoadOid={handleOidLoadInSimulator}
               />

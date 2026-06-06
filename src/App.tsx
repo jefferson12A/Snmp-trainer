@@ -182,7 +182,7 @@ export default function App() {
           {/* User profile avatar card */}
           <div className="h-9 w-9 rounded-full bg-slate-100 overflow-hidden border-2 border-slate-200/80 relative group select-all">
           <img
-             src="../../public/catTranspa.png"
+             src="catTranspa.png"
               alt="Avatar do Usuário"
               className="w-full h-full object-cover"
             />

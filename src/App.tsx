@@ -400,10 +400,7 @@ export default function App() {
         <div className="max-w-6xl mx-auto w-full flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-500">
           <div>© 2026 Network Academy - SNMP Learning Trainer System</div>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-blue-750 transition-colors">Documentação</a>
             <a href="https://datatracker.ietf.org/doc/html/rfc1157" target="_blank" rel="noreferrer" className="hover:text-blue-750 transition-colors">RFC 1157</a>
-            <a href="#" className="hover:text-blue-750 transition-colors">Estrutura das MIBs</a>
-            <a href="#" className="hover:text-blue-750 transition-colors">Manual de Segurança</a>
           </div>
         </div>
       </footer>

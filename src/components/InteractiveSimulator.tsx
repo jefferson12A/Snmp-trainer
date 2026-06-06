@@ -199,6 +199,36 @@ export default function InteractiveSimulator({
       description = "Contador de 32 bits incremental registrando o volume de datagramas IP entregues pelas placas de rede locais.";
       importance = "Vital para detecção de anomalias de trafego ou ataques de negação de serviço (DoS/DDoS).";
       importanceColor = "border-teal-500 bg-teal-50/40 text-teal-900";
+    } else if (cleanOid === '.1.3.6.1.2.1.4.8.0' || cleanOid === 'ipInDiscards.0') {
+      meaning = "ipInDiscards.0 (Pacotes IP Descartados na Entrada)";
+      description = "Informa o número de datagramas IP recebidos com sucesso mas descartados por falta de espaço em buffer ou recursos de hardware do agente.";
+      importance = "Contador crítico! Um valor acima de zero indica saturação crítica do processamento no dispositivo gerenciado.";
+      importanceColor = "border-orange-500 bg-orange-50/40 text-orange-900";
+    } else if (cleanOid === '.1.3.6.1.2.1.4.10.0' || cleanOid === 'ipOutRequests.0') {
+      meaning = "ipOutRequests.0 (Pacotes IP Enviados)";
+      description = "Contador que registra o número total de datagramas IP locais fornecidos para transmissão pelas aplicações locais.";
+      importance = "Mede a taxa de saída de dados pelas camadas internas do dispositivo.";
+      importanceColor = "border-teal-500 bg-teal-50/40 text-teal-900";
+    } else if (cleanOid === '.1.3.6.1.2.1.4.11.0' || cleanOid === 'ipOutDiscards.0') {
+      meaning = "ipOutDiscards.0 (Pacotes IP Descartados na Saída)";
+      description = "Informa o número de datagramas IP de saída que foram descartados pelo dispositivo mesmo sem apresentar erros de formatação (e.g. buffers cheios).";
+      importance = "Indica gargalos significativos em links de upload ou congestionamento das filas de saída.";
+      importanceColor = "border-orange-500 bg-orange-50/40 text-orange-900";
+    } else if (cleanOid === '.1.3.6.1.2.1.6.9.0' || cleanOid === 'tcpCurrEstab.0') {
+      meaning = "tcpCurrEstab.0 (Conexões TCP Estabelecidas)";
+      description = "Informa o número de conexões TCP ativas no dispositivo cujo estado corrente é ESTABLISHED ou CLOSE-WAIT.";
+      importance = "Atributo chave para servidores web e de aplicação auditarem conexões de sessões simultâneas concorrentes.";
+      importanceColor = "border-amber-500 bg-amber-50/40 text-amber-900";
+    } else if (cleanOid === '.1.3.6.1.2.1.7.1.0' || cleanOid === 'udpInDatagrams.0') {
+      meaning = "udpInDatagrams.0 (Datagramas UDP Recebidos)";
+      description = "Informa o número total de datagramas UDP entregues com sucesso aos destinatários ou aplicações rodando neste host.";
+      importance = "Possibilita monitorar o tráfego de entrada sem conexão (DNS, DHCP, NTP ou requisições SNMP secundárias).";
+      importanceColor = "border-cyan-500 bg-cyan-50/40 text-cyan-900";
+    } else if (cleanOid === '.1.3.6.1.2.1.7.4.0' || cleanOid === 'udpOutDatagrams.0') {
+      meaning = "udpOutDatagrams.0 (Datagramas UDP Enviados)";
+      description = "Informa o número total de datagramas UDP transmitidos por este dispositivo de rede.";
+      importance = "Permite identificar taxas de envio de telemetria UDP e potenciais incidentes de varredura ou DDoS baseados em UDP.";
+      importanceColor = "border-cyan-500 bg-cyan-50/40 text-cyan-900";
     } else if (cleanOid.includes('ssCpu') || cleanOid.includes('2021')) {
       meaning = "ssCpu (Uso e Carga Dinâmica da CPU)";
       description = "OIDS associados às MIBs privadas corporativas UNIX de monitoramento (UCD-SNMP-MIB). Ex: ssCpuIdle indica folga livre do processador.";
@@ -345,6 +375,7 @@ export default function InteractiveSimulator({
     writeVal: string,
     overrideCommandLine?: string
   ) => {
+    let resolvedOidForExplanation = '';
     setIsRunning(true);
     setPacketState('sending');
     setExplanationText(`NMS enviando pacote UDP (${cmdId.toUpperCase()}): O Gerente solicitou o OID ${oid} ao agente na porta UDP 161.`);
@@ -442,8 +473,114 @@ export default function InteractiveSimulator({
 
           // Process OIDs Responses on Auth valid
           if (hasSucceeded) {
-            const cleanOid = oid.trim();
-            const normalizedOid = cleanOid.startsWith('.') ? cleanOid : '.' + cleanOid;
+            let cleanOid = oid.trim();
+            let normalizedOid = cleanOid.startsWith('.') ? cleanOid : '.' + cleanOid;
+
+            if (cmdId === 'snmpgetnext') {
+              const normalizeOidToNumeric = (inputOid: string): string => {
+                const clean = inputOid.trim();
+                if (clean.startsWith('.')) return clean;
+                
+                if (clean === 'sysDescr' || clean === 'sysDescr.0') return '.1.3.6.1.2.1.1.1.0';
+                if (clean === 'sysObjectID' || clean === 'sysObjectID.0') return '.1.3.6.1.2.1.1.2.0';
+                if (clean === 'sysUpTime' || clean === 'sysUpTime.0') return '.1.3.6.1.2.1.1.3.0';
+                if (clean === 'sysContact' || clean === 'sysContact.0') return '.1.3.6.1.2.1.1.4.0';
+                if (clean === 'sysName' || clean === 'sysName.0') return '.1.3.6.1.2.1.1.5.0';
+                if (clean === 'sysLocation' || clean === 'sysLocation.0') return '.1.3.6.1.2.1.1.6.0';
+                if (clean === 'sysServices' || clean === 'sysServices.0') return '.1.3.6.1.2.1.1.7.0';
+                if (clean === 'system' || clean === 'sys') return '.1.3.6.1.2.1.1';
+                
+                if (clean === 'ifNumber' || clean === 'ifNumber.0') return '.1.3.6.1.2.1.2.1.0';
+                if (clean === 'ifTable') return '.1.3.6.1.2.1.2.2';
+                if (clean === 'interfaces') return '.1.3.6.1.2.1.2';
+                
+                if (clean === 'ifIndex.1') return '.1.3.6.1.2.1.2.2.1.1.1';
+                if (clean === 'ifDescr.1') return '.1.3.6.1.2.1.2.2.1.2.1';
+                if (clean === 'ifSpeed.1') return '.1.3.6.1.2.1.2.2.1.5.1';
+                if (clean === 'ifOperStatus.1') return '.1.3.6.1.2.1.2.2.1.8.1';
+                
+                if (clean === 'ip' || clean === 'ipForwarding' || clean === 'ipForwarding.0') return '.1.3.6.1.2.1.4.1.0';
+                if (clean === 'ipInReceives' || clean === 'ipInReceives.0') return '.1.3.6.1.2.1.4.3.0';
+                if (clean === 'ipInDiscards' || clean === 'ipInDiscards.0') return '.1.3.6.1.2.1.4.8.0';
+                if (clean === 'ipOutRequests' || clean === 'ipOutRequests.0') return '.1.3.6.1.2.1.4.10.0';
+                if (clean === 'ipOutDiscards' || clean === 'ipOutDiscards.0') return '.1.3.6.1.2.1.4.11.0';
+                if (clean === 'tcp' || clean === 'tcpCurrEstab' || clean === 'tcpCurrEstab.0') return '.1.3.6.1.2.1.6.9.0';
+                if (clean === 'udp' || clean === 'udpInDatagrams' || clean === 'udpInDatagrams.0') return '.1.3.6.1.2.1.7.1.0';
+                if (clean === 'udpOutDatagrams' || clean === 'udpOutDatagrams.0') return '.1.3.6.1.2.1.7.4.0';
+                
+                return '.' + clean;
+              };
+
+              const normalizedInput = normalizeOidToNumeric(cleanOid);
+              
+              const leafOids = [
+                '.1.3.6.1.2.1.1.1.0',
+                '.1.3.6.1.2.1.1.2.0',
+                '.1.3.6.1.2.1.1.3.0',
+                '.1.3.6.1.2.1.1.4.0',
+                '.1.3.6.1.2.1.1.5.0',
+                '.1.3.6.1.2.1.1.6.0',
+                '.1.3.6.1.2.1.1.7.0',
+                '.1.3.6.1.2.1.2.1.0',
+                '.1.3.6.1.2.1.2.2.1.1.1',
+                '.1.3.6.1.2.1.2.2.1.2.1',
+                '.1.3.6.1.2.1.2.2.1.5.1',
+                '.1.3.6.1.2.1.2.2.1.8.1',
+                '.1.3.6.1.2.1.4.1.0',
+                '.1.3.6.1.2.1.4.3.0',
+                '.1.3.6.1.2.1.4.8.0',
+                '.1.3.6.1.2.1.4.10.0',
+                '.1.3.6.1.2.1.4.11.0',
+                '.1.3.6.1.2.1.6.9.0',
+                '.1.3.6.1.2.1.7.1.0',
+                '.1.3.6.1.2.1.7.4.0'
+              ];
+              
+              const compareOids = (oidA: string, oidB: string): number => {
+                const partsA = oidA.split('.').filter(Boolean).map(v => parseInt(v, 10) || 0);
+                const partsB = oidB.split('.').filter(Boolean).map(v => parseInt(v, 10) || 0);
+                const minLen = Math.min(partsA.length, partsB.length);
+                for (let i = 0; i < minLen; i++) {
+                  if (partsA[i] !== partsB[i]) {
+                    return partsA[i] - partsB[i];
+                  }
+                }
+                return partsA.length - partsB.length;
+              };
+              
+              const sortedLeaves = [...leafOids].sort(compareOids);
+              const nextNumericOid = sortedLeaves.find(leaf => compareOids(leaf, normalizedInput) > 0);
+              
+              if (nextNumericOid) {
+                normalizedOid = nextNumericOid;
+                resolvedOidForExplanation = nextNumericOid;
+                if (nextNumericOid === '.1.3.6.1.2.1.1.1.0') cleanOid = 'sysDescr.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.1.2.0') cleanOid = 'sysObjectID.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.1.3.0') cleanOid = 'sysUpTime.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.1.4.0') cleanOid = 'sysContact.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.1.5.0') cleanOid = 'sysName.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.1.6.0') cleanOid = 'sysLocation.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.1.7.0') cleanOid = 'sysServices.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.2.1.0') cleanOid = 'ifNumber.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.2.2.1.1.1') cleanOid = 'ifIndex.1';
+                else if (nextNumericOid === '.1.3.6.1.2.1.2.2.1.2.1') cleanOid = 'ifDescr.1';
+                else if (nextNumericOid === '.1.3.6.1.2.1.2.2.1.5.1') cleanOid = 'ifSpeed.1';
+                else if (nextNumericOid === '.1.3.6.1.2.1.2.2.1.8.1') cleanOid = 'ifOperStatus.1';
+                else if (nextNumericOid === '.1.3.6.1.2.1.4.1.0') cleanOid = 'ipForwarding.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.4.3.0') cleanOid = 'ipInReceives.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.4.8.0') cleanOid = 'ipInDiscards.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.4.10.0') cleanOid = 'ipOutRequests.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.4.11.0') cleanOid = 'ipOutDiscards.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.6.9.0') cleanOid = 'tcpCurrEstab.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.7.1.0') cleanOid = 'udpInDatagrams.0';
+                else if (nextNumericOid === '.1.3.6.1.2.1.7.4.0') cleanOid = 'udpOutDatagrams.0';
+                else cleanOid = nextNumericOid;
+              } else {
+                hasSucceeded = false;
+                outputText = `End of MIB view.\n// O OID informado não possui sucessores léxicos sob o escopo mib-2 do Agente.`;
+                errorExplanation = 'FIM DA ÁRVORE (End of MIB): Não há mais objetos MIB lexicograficamente maiores do que o OID fornecido para serem retornados.';
+              }
+            }
 
             // Match dynamic indices on sub-interfaces in table ifIndex.X, ifDescr.X, ifSpeed.X, ifOperStatus.X
             const ifIndexMatch = normalizedOid.match(/^\.1\.3\.6\.1\.2\.1\.2\.2\.1\.1\.(\d+)$/) || cleanOid.match(/^ifIndex\.(\d+)$/);
@@ -642,6 +779,68 @@ export default function InteractiveSimulator({
                 outputText = `IP-MIB::ipInReceives.0 = Counter32: ${deviceOfCommand.ipInReceives}`;
                 setExplanationText('Sucesso Get-Request: Contador total acumulado de recepção IP de rede ethernet.');
               }
+              else if (cleanOid === '.1.3.6.1.2.1.4.8.0' || cleanOid === 'ipInDiscards.0') {
+                outputText = `IP-MIB::ipInDiscards.0 = Counter32: ${deviceOfCommand.ipInDiscards}`;
+                setExplanationText('Sucesso Get-Request: Contador total de pacotes IP descartados na entrada por congestionamento ou falta de recursos.');
+              }
+              else if (cleanOid === '.1.3.6.1.2.1.4.10.0' || cleanOid === 'ipOutRequests.0') {
+                outputText = `IP-MIB::ipOutRequests.0 = Counter32: ${deviceOfCommand.ipOutRequests}`;
+                setExplanationText('Sucesso Get-Request: total de pacotes IP enviados pelas aplicações ou encaminhados.');
+              }
+              else if (cleanOid === '.1.3.6.1.2.1.4.11.0' || cleanOid === 'ipOutDiscards.0') {
+                outputText = `IP-MIB::ipOutDiscards.0 = Counter32: ${deviceOfCommand.ipOutDiscards}`;
+                setExplanationText('Sucesso Get-Request: pacotes descartados na saída por estouro de buffer ou restrições.');
+              }
+              else if (cleanOid === '.1.3.6.1.2.1.6.9.0' || cleanOid === 'tcpCurrEstab.0') {
+                outputText = `TCP-MIB::tcpCurrEstab.0 = Gauge32: ${deviceOfCommand.tcpCurrEstab}`;
+                setExplanationText('Sucesso Get-Request: conexões TCP estabelecidas (estado ESTABLISHED ou CLOSE-WAIT) neste host.');
+              }
+              else if (cleanOid === '.1.3.6.1.2.1.7.1.0' || cleanOid === 'udpInDatagrams.0') {
+                outputText = `UDP-MIB::udpInDatagrams.0 = Counter32: ${deviceOfCommand.udpInDatagrams}`;
+                setExplanationText('Sucesso Get-Request: datagramas UDP recebidos e processados.');
+              }
+              else if (cleanOid === '.1.3.6.1.2.1.7.4.0' || cleanOid === 'udpOutDatagrams.0') {
+                outputText = `UDP-MIB::udpOutDatagrams.0 = Counter32: ${deviceOfCommand.udpOutDatagrams}`;
+                setExplanationText('Sucesso Get-Request: datagramas UDP enviados por este roteador ou host.');
+              }
+              // Group IP walk or structural node checks
+              else if (cleanOid === '.1.3.6.1.2.1.4' || cleanOid === 'ip') {
+                if (cmdId === 'snmpwalk') {
+                  outputText = `IP-MIB::ipForwarding.0 = INTEGER: forwarding(${deviceOfCommand.ipForwarding})\n` +
+                               `IP-MIB::ipInReceives.0 = Counter32: ${deviceOfCommand.ipInReceives}\n` +
+                               `IP-MIB::ipInDiscards.0 = Counter32: ${deviceOfCommand.ipInDiscards}\n` +
+                               `IP-MIB::ipOutRequests.0 = Counter32: ${deviceOfCommand.ipOutRequests}\n` +
+                               `IP-MIB::ipOutDiscards.0 = Counter32: ${deviceOfCommand.ipOutDiscards}`;
+                  setExplanationText('Sucesso walk recursivo: Mapeou todos os contadores do grupo IP sob o nó .1.3.6.1.2.1.4.');
+                } else {
+                  hasSucceeded = false;
+                  outputText = `Error: OID "${oid}" matches structural node. Use "snmpwalk" instead of "snmpget" to explore structural nodes.`;
+                  errorExplanation = 'ERRO CONCEITUAL: Comandos do tipo "get" exigem precisão absoluta no OID de folha terminando em .0. Tente mudar para "snmpwalk".';
+                }
+              }
+              // Group TCP walk or structural node checks
+              else if (cleanOid === '.1.3.6.1.2.1.6' || cleanOid === 'tcp') {
+                if (cmdId === 'snmpwalk') {
+                  outputText = `TCP-MIB::tcpCurrEstab.0 = Gauge32: ${deviceOfCommand.tcpCurrEstab}`;
+                  setExplanationText('Sucesso walk recursivo: Mapeou as conexões do grupo TCP sob o nó .1.3.6.1.2.1.6.');
+                } else {
+                  hasSucceeded = false;
+                  outputText = `Error: OID "${oid}" matches structural node. Use "snmpwalk" instead of "snmpget" to explore structural nodes.`;
+                  errorExplanation = 'ERRO CONCEITUAL: Comandos do tipo "get" exigem precisão absoluta no OID de folha terminando em .0. Tente mudar para "snmpwalk".';
+                }
+              }
+              // Group UDP walk or structural node checks
+              else if (cleanOid === '.1.3.6.1.2.1.7' || cleanOid === 'udp') {
+                if (cmdId === 'snmpwalk') {
+                  outputText = `UDP-MIB::udpInDatagrams.0 = Counter32: ${deviceOfCommand.udpInDatagrams}\n` +
+                               `UDP-MIB::udpOutDatagrams.0 = Counter32: ${deviceOfCommand.udpOutDatagrams}`;
+                  setExplanationText('Sucesso walk recursivo: Mapeou os contadores do grupo UDP sob o nó .1.3.6.1.2.1.7.');
+                } else {
+                  hasSucceeded = false;
+                  outputText = `Error: OID "${oid}" matches structural node. Use "snmpwalk" instead of "snmpget" to explore structural nodes.`;
+                  errorExplanation = 'ERRO CONCEITUAL: Comandos do tipo "get" exigem precisão absoluta no OID de folha terminando em .0. Tente mudar para "snmpwalk".';
+                }
+              }
               // Group System root walk
               else if (cleanOid.startsWith('.1.3.6.1.2.1.1') || cleanOid === 'sys' || cleanOid === 'system') {
                 if (cmdId === 'snmpwalk') {
@@ -679,10 +878,12 @@ export default function InteractiveSimulator({
             }
           ]);
 
-          setPacketState(hasSucceeded ? 'done' : 'error');
-          if (!hasSucceeded) {
-            setExplanationText(errorExplanation);
-          }
+           setPacketState(hasSucceeded ? 'done' : 'error');
+           if (!hasSucceeded) {
+             setExplanationText(errorExplanation);
+           } else if (cmdId === 'snmpgetnext') {
+             setExplanationText(prev => `[GET-NEXT] ${prev} (Como foi uma chamada GetNext, o Agente localizou e retornou o seu sucessor léxico imediato na árvore MIB: ${resolvedOidForExplanation})`);
+           }
 
           // Callback to trigger Academy Labs success checking
           if (hasSucceeded && onNotifyLabComplete) {
@@ -1192,29 +1393,29 @@ export default function InteractiveSimulator({
                   </span>
                 </div>
 
-                <div className="grid gap-2 grid-cols-2">
-                  <div>
-                    <label className="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">Usuário (Security Name)</label>
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:items-center sm:justify-center">
+                  <div className="flex flex-col">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1 text-left">Usuário (Security Name)</label>
                     <input
                       id="v3-user"
                       type="text"
                       value={v3User}
                       onChange={(e) => setV3User(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-700 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-3 sm:px-2.5 sm:py-1.5 text-xs font-mono font-bold text-slate-700 focus:ring-1 focus:ring-blue-600 focus:outline-none text-left"
                     />
                   </div>
 
-                  <div>
-                    <label className="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">Nível Segurança</label>
+                  <div className="flex flex-col">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1 text-left">Nível Segurança</label>
                     <select
                       id="v3-level"
                       value={v3Level}
                       onChange={(e) => setV3Level(e.target.value as any)}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-3 sm:px-2 sm:py-1.5 text-xs font-semibold text-slate-700 focus:ring-1 focus:ring-blue-600 focus:outline-none text-left"
                     >
-                      <option value="noAuthNoPriv">noAuthNoPriv</option>
-                      <option value="authNoPriv">authNoPriv</option>
-                      <option value="authPriv">authPriv</option>
+                      <option value="noAuthNoPriv" className="text-left">noAuthNoPriv</option>
+                      <option value="authNoPriv" className="text-left">authNoPriv</option>
+                      <option value="authPriv" className="text-left">authPriv</option>
                     </select>
                   </div>
                 </div>
@@ -1224,26 +1425,26 @@ export default function InteractiveSimulator({
                   <motion.div
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="grid gap-2 grid-cols-2 bg-white/60 p-2.5 rounded-lg border border-slate-200/60"
+                    className="grid gap-3 grid-cols-1 sm:grid-cols-2 bg-white/60 p-3 sm:p-2.5 rounded-lg border border-slate-200/60"
                   >
-                    <div>
-                      <label className="text-[9px] uppercase font-extrabold text-slate-400 block mb-0.5">Protocolo Auth</label>
+                    <div className="flex flex-col">
+                      <label className="text-[10px] uppercase font-extrabold text-slate-400 block mb-1 text-left">Protocolo Auth</label>
                       <select
                         value={v3AuthProto}
                         onChange={(e) => setV3AuthProto(e.target.value as any)}
-                        className="w-full bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[11px] font-mono font-medium focus:outline-none"
+                        className="w-full bg-white border border-slate-200 rounded px-3 py-3 sm:px-1.5 sm:py-0.5 text-xs sm:text-[11px] font-mono font-medium focus:outline-none text-left"
                       >
-                        <option value="SHA">SHA-1</option>
-                        <option value="MD5">MD5</option>
+                        <option value="SHA" className="text-left">SHA-1</option>
+                        <option value="MD5" className="text-left">MD5</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="text-[9px] uppercase font-extrabold text-slate-400 block mb-0.5">Senha Autenticação</label>
+                    <div className="flex flex-col">
+                      <label className="text-[10px] uppercase font-extrabold text-slate-400 block mb-1 text-left">Senha Autenticação</label>
                       <input
                         type="password"
                         value={v3AuthPass}
                         onChange={(e) => setV3AuthPass(e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[11px] font-mono text-slate-800 focus:outline-none"
+                        className="w-full bg-white border border-slate-200 rounded px-3 py-3 sm:px-1.5 sm:py-0.5 text-xs sm:text-[11px] font-mono text-slate-800 focus:outline-none text-left"
                       />
                     </div>
                   </motion.div>
@@ -1254,26 +1455,26 @@ export default function InteractiveSimulator({
                   <motion.div
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="grid gap-2 grid-cols-2 bg-white/60 p-2.5 rounded-lg border border-slate-200/60"
+                    className="grid gap-3 grid-cols-1 sm:grid-cols-2 bg-white/60 p-3 sm:p-2.5 rounded-lg border border-slate-200/60"
                   >
-                    <div>
-                      <label className="text-[9px] uppercase font-extrabold text-slate-400 block mb-0.5">Cripto (Privacy)</label>
+                    <div className="flex flex-col">
+                      <label className="text-[10px] uppercase font-extrabold text-slate-400 block mb-1 text-left">Cripto (Privacy)</label>
                       <select
                         value={v3PrivProto}
                         onChange={(e) => setV3PrivProto(e.target.value as any)}
-                        className="w-full bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[11px] font-mono font-medium focus:outline-none"
+                        className="w-full bg-white border border-slate-200 rounded px-3 py-3 sm:px-1.5 sm:py-0.5 text-xs sm:text-[11px] font-mono font-medium focus:outline-none text-left"
                       >
-                        <option value="AES">AES-128</option>
-                        <option value="DES">DES</option>
+                        <option value="AES" className="text-left">AES-128</option>
+                        <option value="DES" className="text-left">DES</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="text-[9px] uppercase font-extrabold text-slate-400 block mb-0.5">Senha de Hash Privacy</label>
+                    <div className="flex flex-col">
+                      <label className="text-[10px] uppercase font-extrabold text-slate-400 block mb-1 text-left">Senha de Hash Privacy</label>
                       <input
                         type="password"
                         value={v3PrivPass}
                         onChange={(e) => setV3PrivPass(e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[11px] font-mono text-slate-800 focus:outline-none"
+                        className="w-full bg-white border border-slate-200 rounded px-3 py-3 sm:px-1.5 sm:py-0.5 text-xs sm:text-[11px] font-mono text-slate-800 focus:outline-none text-left"
                       />
                     </div>
                   </motion.div>

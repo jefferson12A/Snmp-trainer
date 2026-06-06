@@ -24,7 +24,13 @@ export const INITIAL_DEVICES: SNMPDevice[] = [
       { id: 4, descr: 'tun0 - IPSec VPN Filial', type: 'tunnel', status: 'down', speed: '100 Mbps' }
     ],
     ipForwarding: 1, // forwarding
-    ipInReceives: 412952 // total received IP counter
+    ipInReceives: 412952, // total received IP counter
+    ipOutRequests: 409152,
+    ipInDiscards: 42,
+    ipOutDiscards: 15,
+    tcpCurrEstab: 4,
+    udpInDatagrams: 154820,
+    udpOutDatagrams: 153020
   },
   {
     ip: '192.168.1.10',
@@ -41,7 +47,13 @@ export const INITIAL_DEVICES: SNMPDevice[] = [
       { id: 2, descr: 'eth0', type: 'ethernetCsmacd', status: 'up', speed: '10 Gbps' }
     ],
     ipForwarding: 2, // not forwarding
-    ipInReceives: 18451800
+    ipInReceives: 18451800,
+    ipOutRequests: 17290110,
+    ipInDiscards: 12,
+    ipOutDiscards: 5,
+    tcpCurrEstab: 48,
+    udpInDatagrams: 194820,
+    udpOutDatagrams: 193020
   },
   {
     ip: '192.168.1.50',
@@ -60,7 +72,13 @@ export const INITIAL_DEVICES: SNMPDevice[] = [
       { id: 4, descr: 'GigabitEthernet0/4 (Access Point)', type: 'ethernetCsmacd', status: 'down', speed: '1 Gbps' }
     ],
     ipForwarding: 2,
-    ipInReceives: 9540301
+    ipInReceives: 9540301,
+    ipOutRequests: 8962002,
+    ipInDiscards: 211,
+    ipOutDiscards: 89,
+    tcpCurrEstab: 1,
+    udpInDatagrams: 4301540,
+    udpOutDatagrams: 4298110
   },
   {
     ip: '192.168.1.100',
@@ -77,7 +95,13 @@ export const INITIAL_DEVICES: SNMPDevice[] = [
       { id: 2, descr: 'wlan0', type: 'ieee80211', status: 'down', speed: '54 Mbps' }
     ],
     ipForwarding: 2,
-    ipInReceives: 4321
+    ipInReceives: 4321,
+    ipOutRequests: 4125,
+    ipInDiscards: 0,
+    ipOutDiscards: 0,
+    tcpCurrEstab: 2,
+    udpInDatagrams: 1500,
+    udpOutDatagrams: 1485
   }
 ];
 
@@ -90,6 +114,14 @@ export const SNMP_COMMANDS: SNMPCommand[] = [
     suggestedOid: '.1.3.6.1.2.1.1.1.0',
     oidDescription: 'sysDescr (Descrição do sistema)',
     helpText: 'Usado para recuperar uma única instância de informação de um dispositivo. Exemplo: recuperar o nome ou localização de um roteador.'
+  },
+  {
+    id: 'snmpgetnext',
+    name: 'snmpgetnext',
+    description: 'Retorna o próximo OID na árvore a partir do OID informado.',
+    suggestedOid: '.1.3.6.1.2.1.1.1.0',
+    oidDescription: 'sysDescr (Descobre o seu sucessor léxico)',
+    helpText: 'Usado para descobrir OIDs sequencialmente. O agente retorna o OID léxico sucessor imediato e o seu respectivo valor.'
   },
   {
     id: 'snmpwalk',
@@ -134,8 +166,8 @@ export const MIB_NODES: Record<string, MIBNode> = {
   '1.3.6.1': { oid: '.1.3.6.1', name: 'internet', description: 'Subárvore designada para protocolos de rede internet', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6', children: ['1.3.6.1.2', '1.3.6.1.4'] },
   '1.3.6.1.4': { oid: '.1.3.6.1.4', name: 'private', description: 'Nó para extensões privadas e empresariais', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1', children: ['1.3.6.1.4.1'] },
   '1.3.6.1.4.1': { oid: '.1.3.6.1.4.1', name: 'enterprise', description: 'Identificação de fabricantes de rede (e.g., Cisco, HP, Net-SNMP)', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.4' },
-  '1.3.6.1.2': { oid: '.1.3.6.1.2', name: 'mgmt', description: 'Subárvore de Gerenciamento da Internet padrão', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1', children: ['1.3.6.1.2.1'] },
-  '1.3.6.1.2.1': { oid: '.1.3.6.1.2.1', name: 'mib-2', description: 'Definições padrão de MIB da IETF (Management Information Base v2)', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2', children: ['1.3.6.1.2.1.1', '1.3.6.1.2.1.2', '1.3.6.1.2.1.4'] },
+  '1.3.6.1.2': { oid: '.1.3.6.1.2', name: 'mgmt', description: 'Subárvore de Gerenciamento da Internet padrão', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2', children: ['1.3.6.1.2.1'] },
+  '1.3.6.1.2.1': { oid: '.1.3.6.1.2.1', name: 'mib-2', description: 'Definições padrão de MIB da IETF (Management Information Base v2)', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2', children: ['1.3.6.1.2.1.1', '1.3.6.1.2.1.2', '1.3.6.1.2.1.4', '1.3.6.1.2.1.6', '1.3.6.1.2.1.7'] },
   
   // system group (.1.3.6.1.2.1.1)
   '1.3.6.1.2.1.1': { oid: '.1.3.6.1.2.1.1', name: 'system', description: 'Grupo de informações de identificação do sistema e uptime', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2.1', children: ['1.3.6.1.2.1.1.1.0', '1.3.6.1.2.1.1.2.0', '1.3.6.1.2.1.1.3.0', '1.3.6.1.2.1.1.4.0', '1.3.6.1.2.1.1.5.0', '1.3.6.1.2.1.1.6.0', '1.3.6.1.2.1.1.7.0'] },
@@ -146,7 +178,7 @@ export const MIB_NODES: Record<string, MIBNode> = {
   '1.3.6.1.2.1.1.5.0': { oid: '.1.3.6.1.2.1.1.5.0', name: 'sysName.0', description: 'Nome de host configurado no sistema para este dispositivo gerenciado.', syntax: 'DisplayString (OCTET STRING)', access: 'Read-Write', parent: '1.3.6.1.2.1.1' },
   '1.3.6.1.2.1.1.6.0': { oid: '.1.3.6.1.2.1.1.6.0', name: 'sysLocation.0', description: 'Descrição da localização física do hardware dentro da infraestrutura física da rede.', syntax: 'DisplayString (OCTET STRING)', access: 'Read-Write', parent: '1.3.6.1.2.1.1' },
   '1.3.6.1.2.1.1.7.0': { oid: '.1.3.6.1.2.1.1.7.0', name: 'sysServices.0', description: 'Um valor que indica em quais camadas de rede (OSI 1-7) este dispositivo provê serviços primários.', syntax: 'INTEGER (0..127)', access: 'Read-Only', parent: '1.3.6.1.2.1.1' },
-
+ 
   // interfaces group (.1.3.6.1.2.1.2)
   '1.3.6.1.2.1.2': { oid: '.1.3.6.1.2.1.2', name: 'interfaces', description: 'Métricas e estado das placas de rede físicas e lógicas deste dispositivo.', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2.1', children: ['1.3.6.1.2.1.2.1.0', '1.3.6.1.2.1.2.2.0'] },
   '1.3.6.1.2.1.2.1.0': { oid: '.1.3.6.1.2.1.2.1.0', name: 'ifNumber.0', description: 'Número total de interfaces de rede presentes neste dispositivo (sejam físicas ou virtuais).', syntax: 'INTEGER', access: 'Read-Only', parent: '1.3.6.1.2.1.2' },
@@ -155,11 +187,23 @@ export const MIB_NODES: Record<string, MIBNode> = {
   '1.3.6.1.2.1.2.2.1.2.1': { oid: '.1.3.6.1.2.1.2.2.1.2.1', name: 'ifDescr.1', description: 'A descrição nominal da primeira interface física, ex: GigabitEthernet0/0.', syntax: 'DisplayString (OCTET STRING)', access: 'Read-Only', parent: '1.3.6.1.2.1.2.2.0' },
   '1.3.6.1.2.1.2.2.1.5.1': { oid: '.1.3.6.1.2.1.2.2.1.5.1', name: 'ifSpeed.1', description: 'A velocidade de banda de tráfego nominal suportada pela primeira interface em bits/s.', syntax: 'Gauge32', access: 'Read-Only', parent: '1.3.6.1.2.1.2.2.0' },
   '1.3.6.1.2.1.2.2.1.8.1': { oid: '.1.3.6.1.2.1.2.2.1.8.1', name: 'ifOperStatus.1', description: 'O estado ativo mecânico operacional atual da interface: 1 para up e 2 para down.', syntax: 'INTEGER { up(1), down(2) }', access: 'Read-Only', parent: '1.3.6.1.2.1.2.2.0' },
-
+ 
   // ip group (.1.3.6.1.2.1.4)
-  '1.3.6.1.2.1.4': { oid: '.1.3.6.1.2.1.4', name: 'ip', description: 'Roteamento e estatística do protocolo IP neste dispositivo gerenciado.', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2.1', children: ['1.3.6.1.2.1.4.1.0', '1.3.6.1.2.1.4.3.0'] },
+  '1.3.6.1.2.1.4': { oid: '.1.3.6.1.2.1.4', name: 'ip', description: 'Roteamento e estatística do protocolo IP neste dispositivo gerenciado.', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2.1', children: ['1.3.6.1.2.1.4.1.0', '1.3.6.1.2.1.4.3.0', '1.3.6.1.2.1.4.8.0', '1.3.6.1.2.1.4.10.0', '1.3.6.1.2.1.4.11.0'] },
   '1.3.6.1.2.1.4.1.0': { oid: '.1.3.6.1.2.1.4.1.0', name: 'ipForwarding.0', description: 'Configurado como 1 se o nó atua encaminhando pacotes IP (Roteador), ou 2 se é apenas host de destino final.', syntax: 'INTEGER { forwarding(1), notForwarding(2) }', access: 'Read-Write', parent: '1.3.6.1.2.1.4' },
-  '1.3.6.1.2.1.4.3.0': { oid: '.1.3.6.1.2.1.4.3.0', name: 'ipInReceives.0', description: 'Número total de datagramas IP recebidos das interfaces de rede, incluindo os recebidos com erro.', syntax: 'Counter32', access: 'Read-Only', parent: '1.3.6.1.2.1.4' }
+  '1.3.6.1.2.1.4.3.0': { oid: '.1.3.6.1.2.1.4.3.0', name: 'ipInReceives.0', description: 'Número total de datagramas IP recebidos das interfaces de rede, incluindo os recebidos com erro.', syntax: 'Counter32', access: 'Read-Only', parent: '1.3.6.1.2.1.4' },
+  '1.3.6.1.2.1.4.8.0': { oid: '.1.3.6.1.2.1.4.8.0', name: 'ipInDiscards.0', description: 'O número de datagramas IP de entrada descartados por falta de espaço em buffer ou escassez de recursos.', syntax: 'Counter32', access: 'Read-Only', parent: '1.3.6.1.2.1.4' },
+  '1.3.6.1.2.1.4.10.0': { oid: '.1.3.6.1.2.1.4.10.0', name: 'ipOutRequests.0', description: 'O número total de datagramas IP locais fornecidos para transmissão.', syntax: 'Counter32', access: 'Read-Only', parent: '1.3.6.1.2.1.4' },
+  '1.3.6.1.2.1.4.11.0': { oid: '.1.3.6.1.2.1.4.11.0', name: 'ipOutDiscards.0', description: 'O número de datagramas IP de saída descartados por falta de recursos no agente.', syntax: 'Counter32', access: 'Read-Only', parent: '1.3.6.1.2.1.4' },
+ 
+  // tcp group (.1.3.6.1.2.1.6)
+  '1.3.6.1.2.1.6': { oid: '.1.3.6.1.2.1.6', name: 'tcp', description: 'Estatísticas e conexões do protocolo TCP ativos no dispositivo.', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2.1', children: ['1.3.6.1.2.1.6.9.0'] },
+  '1.3.6.1.2.1.6.9.0': { oid: '.1.3.6.1.2.1.6.9.0', name: 'tcpCurrEstab.0', description: 'O número de conexões TCP cujo estado atual é ESTABLISHED ou CLOSE-WAIT.', syntax: 'Gauge32', access: 'Read-Only', parent: '1.3.6.1.2.1.6' },
+ 
+  // udp group (.1.3.6.1.2.1.7)
+  '1.3.6.1.2.1.7': { oid: '.1.3.6.1.2.1.7', name: 'udp', description: 'Estatísticas de tráfego de datagramas do protocolo UDP neste nó.', syntax: 'Nó Estrutural', access: 'No-Access', parent: '1.3.6.1.2.1', children: ['1.3.6.1.2.1.7.1.0', '1.3.6.1.2.1.7.4.0'] },
+  '1.3.6.1.2.1.7.1.0': { oid: '.1.3.6.1.2.1.7.1.0', name: 'udpInDatagrams.0', description: 'Número total de datagramas UDP entregues com sucesso aos usuários ou aplicações locais.', syntax: 'Counter32', access: 'Read-Only', parent: '1.3.6.1.2.1.7' },
+  '1.3.6.1.2.1.7.4.0': { oid: '.1.3.6.1.2.1.7.4.0', name: 'udpOutDatagrams.0', description: 'Número total de datagramas UDP enviados por este dispositivo.', syntax: 'Counter32', access: 'Read-Only', parent: '1.3.6.1.2.1.7' }
 };
 
 // Labs for Academy Mode (Guided Tutorial)

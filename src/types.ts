@@ -22,6 +22,12 @@ export interface SNMPDevice {
   }[];
   ipForwarding: number;
   ipInReceives: number;
+  ipOutRequests: number;
+  ipInDiscards: number;
+  ipOutDiscards: number;
+  tcpCurrEstab: number;
+  udpInDatagrams: number;
+  udpOutDatagrams: number;
 }
 
 export interface MIBNode {

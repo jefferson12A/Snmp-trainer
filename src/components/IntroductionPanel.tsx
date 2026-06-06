@@ -28,10 +28,10 @@ export default function IntroductionPanel({ onSelectCommand, networkImage }: Int
               O que é SNMP?
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
-              Arquitetura Manager-Agent
+              Arquitetura Gerente-Agente
             </h1>
             <p className="text-base md:text-lg text-slate-600 leading-relaxed max-w-2xl">
-              O <strong>Simple Network Management Protocol (SNMP)</strong> é o padrão da indústria de redes IP para coletar métricas, monitorar performance e alterar configurações remotamente. A comunicação ocorre em um modelo síncrono ou assíncrono entre um gerente central e múltiplos dispositivos chamados de agentes.
+              O <strong>Protocolo simples de gerenciamento de rede(SNMP)</strong>é um padrão da indústria para monitoramento e administração de dispositivos em redes IP. Criado nos anos 80, ele se tornou a base para coletar métricas de desempenho, acompanhar disponibilidade e até alterar configurações remotamente. A comunicação ocorre entre um gerente central (como um servidor de monitoramento) e múltiplos agentes (roteadores, switches, servidores), em um modelo que pode ser síncrono ou assíncrono.
             </p>
 
             {/* Concept selectors */}
@@ -47,7 +47,7 @@ export default function IntroductionPanel({ onSelectCommand, networkImage }: Int
               >
                 <div className="flex items-center gap-2 text-blue-800 font-semibold text-sm">
                   <Server className="h-4 w-4 text-blue-600" />
-                  NMS (Manager / Gerente)
+                  NMS (Manager/Gerente)
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
                   Central que gerencia as requisições, faz pooling e centraliza as estatísticas e logs da empresa.
